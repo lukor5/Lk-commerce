@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'lkcommerce.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'lkcommercedb',
+        'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'miriam123', 
         'HOST': 'lkcommercedb.cfu8mwgk6xtw.eu-north-1.rds.amazonaws.com',
