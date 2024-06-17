@@ -31,7 +31,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:9000",
     "http://lkcommercebucket.s3-website.eu-north-1.amazonaws.com"
 ]
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '16.16.128.80']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '13.50.242.240']
 
 CORS_ALLOW_CREDENTIALS = True
 CSRF_COOKIE_HTTPONLY = False
@@ -92,10 +92,10 @@ WSGI_APPLICATION = 'lkcommerce.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
+        'NAME': 'lkcommercedb',
         'USER': 'postgres',
         'PASSWORD': 'miriam123', 
-        'HOST': 'localhost',
+        'HOST': 'lkcommercedb.cfu8mwgk6xtw.eu-north-1.rds.amazonaws.com',
         'PORT': '5432',
     }
 }
