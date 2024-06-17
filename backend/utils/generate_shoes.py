@@ -3,7 +3,7 @@ import sys
 import os
 import django
 from django.core.files import File
-sys.path.append(r'C:\Users\Light\lkcommerce\backend')
+sys.path.append(r'/home/ubuntu/Lk-commerce/backend')
 from lkcommerce import settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lkcommerce.settings')
 
@@ -22,7 +22,7 @@ COLORS = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple', 'Pink', 'Black',
 BRAND_CHOICES = ['StyleVista', 'UrbanWeave', 'GlamourGlitz', 'TrendThread', 'ChicShack', 'VogueValley', 'ModeMosaic', 'FabricFable', 'AttireAura', 'WearWhisper', 'OutfitOracle', 'FashionFlare']
 MAX_STOCK = 100
 CATEGORY_CHOICES = ['Men', 'Women', 'Kids']
-raw_path = r'C:\Users\Light\lkcommerce\backend\media'
+sys.path.append(r'/home/ubuntu/Lk-commerce/backend/media')
 # Function to create random products, types, and variants
 
 

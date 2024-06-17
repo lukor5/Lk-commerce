@@ -3,7 +3,7 @@ import sys
 import os
 import django
 from django.core.files import File
-sys.path.append(r'C:\Users\Light\lkcommerce\backend')
+sys.path.append(r'/home/ubuntu/Lk-commerce/backend')
 from lkcommerce import settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lkcommerce.settings')
 
@@ -17,7 +17,7 @@ from decimal import Decimal
 
 COLORS = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple', 'Pink', 'Black', 'White', 'Gray', 'Brown', 'Beige']
 BRAND_CHOICES = ['StyleVista', 'UrbanWeave', 'GlamourGlitz', 'TrendThread', 'ChicShack', 'VogueValley', 'ModeMosaic', 'FabricFable', 'AttireAura', 'WearWhisper', 'OutfitOracle', 'FashionFlare']
-raw_path = r'C:\Users\Light\lkcommerce\backend\media'
+sys.path.append(r'/home/ubuntu/Lk-commerce/backend/media')
 
 @transaction.atomic
 def appendColorsAndBrands():

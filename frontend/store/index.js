@@ -138,7 +138,7 @@ export default createStore({
     },
     async fetchInitialProductData({ commit }) {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/shop/products');
+        const response = await axios.get('http://16.16.128.80/shop/products');
         const products = response.data;
         commit('setProductList', products);
         commit('setOriginalProductList', products);
@@ -149,7 +149,7 @@ export default createStore({
     },
     async fetchBasket({ commit, state }, basketId) {
       if (state.hasInitialized) return;
-      let url = 'http://127.0.0.1:8000/shop/basket/';
+      let url = 'http://16.16.128.80/shop/basket/';
       if (basketId) {
         url += basketId;
       }
@@ -172,7 +172,7 @@ export default createStore({
     },
     async fetchNotifications({ commit, state }) {
       if (state.hasInitialized) return;
-      const url = 'http://127.0.0.1:8000/shop/notifications';
+      const url = 'http://16.16.128.80/shop/notifications';
       try {
       const response = await axios.get(url);
       const messages = response.data;
@@ -185,7 +185,7 @@ export default createStore({
     },
     async fetchOrders({ commit, state }, user_id) {
       if (state.hasInitialized) return;
-      let url = 'http://127.0.0.1:8000/shop/user-orders';
+      let url = 'http://16.16.128.80/shop/user-orders';
       axios.get(`${url}/${user_id}`).then(response => {
 
         commit('setOrders', response.data)
@@ -195,7 +195,7 @@ export default createStore({
     },
     async fetchVouchers({ commit, state }, user_id) {
       if (state.hasInitialized) return;
-      let url = 'http://127.0.0.1:8000/shop/user-vouchers';
+      let url = 'http://16.16.128.80/shop/user-vouchers';
       axios.get(`${url}/${user_id}`).then(response => {
 
         commit('setVouchers', response.data)
