@@ -105,6 +105,10 @@ export default {
     },
     handleProductClicked(product) {
       this.$emit("product-clicked", product);
+        window.scrollTo({
+      top: 0,          
+      behavior: 'smooth' 
+    });
     },
     handleCarouselClicked(direction) {
       if (!this.moving) {
@@ -142,7 +146,6 @@ export default {
     },
     animationEnded() {
       this.updateCarousel();
-
       this.moveCarousel = "none";
       this.showCarouselProduct = "none";
       setTimeout(() => {
@@ -174,11 +177,11 @@ export default {
         if (this.isMovingByItself) {
           this.handleCarouselClicked("right");
         }
-      }, 5000); // Adjust time as needed
+      }, 5000);
     },
     updateVisibleProducts() {
       const width = window.innerWidth;
-      const visibleCount = width < 900 ? 1 : 3; // Show 1 product if width < 900px else show 3
+      const visibleCount = width < 900 ? 1 : 3;
       this.carouselBestsellers = this.bestsellers.slice(0, visibleCount);
     },
     handleResize() {
@@ -216,7 +219,7 @@ export default {
   align-items: center;
 }
 h3 {
-  letter-spacing:  5px;
+  letter-spacing: 5px;
   padding-bottom: 5px;
   border-bottom: 1px solid var(--secondary-color);
 }

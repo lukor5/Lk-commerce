@@ -47,5 +47,6 @@ urlpatterns = [
     path('notifications', views.unread_notifications),
     path('notification-read', views.notification_read),
     path('mark-all-as-read', views.mark_all_as_read),
-    path('all-notifications', views.all_notifications)
+    path('all-notifications', views.all_notifications),
+    path('low-stock', views.low_on_stock)
 ]

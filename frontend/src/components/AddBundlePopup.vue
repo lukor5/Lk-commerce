@@ -159,7 +159,7 @@ export default {
           });
         })
         .catch((error) => {
-            console.log('error', error)
+          console.log("error", error);
         });
     },
     addBundleToBasket() {
@@ -190,7 +190,6 @@ export default {
           "X-Session-Key": this.$store.state.sessionKey,
         };
       }
-      console.log(data)
       axios
         .post(this.baseUrl + "/add-promotion-bundle-to-basket", data, {
           headers,
@@ -249,10 +248,10 @@ export default {
     handleColorButtonClicked(index, color) {
       this.activeColor = index;
       this.selectedColor = color;
-      this.messages = []
+      this.messages = [];
     },
     handleNextProductClicked() {
-        this.messages = []
+      this.messages = [];
       if (this.checkVariantsSelected()) {
         const bundleProduct = {
           id: this.currentId,

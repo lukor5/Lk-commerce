@@ -22,7 +22,7 @@ const routes = [
 
   //Admin routes
   { path: '/admin', name: 'adminPanel' },
-  { path: '/admin/orders', component: OrderList, name: 'orderList' },
+  { path: '/admin/orders', component: OrderList, name: 'orderList', props: (route) => ({ username: route.query.username }) },
   { path: '/admin/bundles', component: AdminBundleList, name: 'adminBundleList' },
   { path: '/admin/users', component: AdminUserList, name: 'adminUserList' },
   { path: '/admin/payments', component: AdminPaymentList, name: 'adminPaymentList' },

@@ -22,8 +22,10 @@ from utils.dummy_payment_gateway import process_payment
 from utils.obfuscate_card_number import obfuscate_card_number
 from django.db.models import Q
 import json
-# Create your views here.
+import logging
 
+# Create your views here.
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def user_login(request):
@@ -98,6 +100,7 @@ def create_product(request):
         type = request.POST.get('type')
         variants_str = request.POST.get('variants')
         variants = json.loads(variants_str)
+        print(variants)
         product_type = ProductType.objects.get(id=type)
 
         if product:
@@ -136,8 +139,11 @@ def create_product(request):
                 product = Product.objects.create(name=name, body=body, price=price, discount=discount,
                                                  is_bestseller=is_bestseller, category=category, product_type=product_type)
             for variant in variants:
+                color = variant.get('color')
+                size = variant.get('size')
+                stock = variant.get('stock')
                 product_variant = ProductVariant.objects.create(
-                    product=product, size=variant)
+                    product=product, size=size, color=color, stock=stock)
             return JsonResponse({'success': 'product created'})
     else:
         return JsonResponse({'error': 'Invalid method'}, status=405)
@@ -188,8 +194,10 @@ def add_to_basket(request):
 
         try:
             product = Product.objects.get(pk=product_id)
-            variant = ProductVariant.objects.get(size=size, product=product, color=color) if size else None
-            basket, basket_item = add_product_to_basket(user_id, session_key, product, variant)
+            variant = ProductVariant.objects.get(
+                size=size, product=product, color=color) if size else None
+            basket, basket_item = add_product_to_basket(
+                user_id, session_key, product, variant)
             return JsonResponse({'success': 'Product added'}, status=200)
         except Product.DoesNotExist:
             return JsonResponse({'error': 'Product not found.'}, status=404)
@@ -199,6 +207,7 @@ def add_to_basket(request):
             return JsonResponse({'error': str(e)}, status=500)
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
 
 @csrf_exempt
 def add_promotion_bundle_to_basket(request):
@@ -215,14 +224,17 @@ def add_promotion_bundle_to_basket(request):
 
         try:
             primary_product = Product.objects.get(pk=primary_product_id)
-            variant = ProductVariant.objects.get(size=size, product=primary_product, color=color) if size else None
+            variant = ProductVariant.objects.get(
+                size=size, product=primary_product, color=color) if size else None
 
             if not discounted_size or not discounted_color:
                 return JsonResponse({'error': 'Both discounted size and color must be provided.'}, status=400)
 
             discounted_product = Product.objects.get(pk=discounted_product_id)
-            promotion = ProductsPromotion.objects.get(primary_product=primary_product, discounted_product=discounted_product)
-            discounted_variant = ProductVariant.objects.get(size=discounted_size, color=discounted_color, product=discounted_product)
+            promotion = ProductsPromotion.objects.get(
+                primary_product=primary_product, discounted_product=discounted_product)
+            discounted_variant = ProductVariant.objects.get(
+                size=discounted_size, color=discounted_color, product=discounted_product)
 
             promotion_added = add_product_to_basket(
                 user_id, session_key, discounted_product, discounted_variant, promotion.discount, check_existing=True
@@ -231,7 +243,8 @@ def add_promotion_bundle_to_basket(request):
             if not promotion_added:
                 return JsonResponse({'error': 'Promotional product already in basket.'}, status=400)
 
-            basket, basket_item = add_product_to_basket(user_id, session_key, primary_product, variant)
+            basket, basket_item = add_product_to_basket(
+                user_id, session_key, primary_product, variant)
             return JsonResponse({'success': 'Promotion bundle added'}, status=200)
         except Product.DoesNotExist:
             return JsonResponse({'error': 'Product not found.'}, status=404)
@@ -244,18 +257,19 @@ def add_promotion_bundle_to_basket(request):
 
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
+
 @csrf_exempt
 def add_product_to_basket(user_id, session_key, product, variant, discount=0, check_existing=False):
     if user_id:
         basket, _ = Basket.objects.get_or_create(
             user_id=user_id, order__isnull=True)
         basket_item, created = BasketItem.objects.get_or_create(
-            basket=basket, product=product)
+            basket=basket, product=product, variant=variant)
     else:
         basket, _ = TemporaryBasket.objects.get_or_create(
             session_key=session_key, order__isnull=True)
         basket_item, created = TemporaryBasketItem.objects.get_or_create(
-            temporary_basket=basket, product=product)
+            temporary_basket=basket, product=product,variant=variant)
     if check_existing and not created:
         return False
     if not check_existing or created:
@@ -292,7 +306,7 @@ def update_basket(request):
                     temporary_basket=basket, product_id=product_id, variant_id=variant_id)
             else:
                 return JsonResponse({'error': 'Invalid basket identifier.'}, status=400)
-            
+
             promotions = ProductsPromotion.objects.filter(
                 Q(primary_product_id=product_id) | Q(discounted_product_id=product_id))
 
@@ -308,7 +322,7 @@ def update_basket(request):
                     basket=basket, product=promotion.discounted_product).first() if basket_id else \
                     TemporaryBasketItem.objects.filter(
                     temporary_basket=basket, product=promotion.discounted_product).first()
-                
+
                 if primary_product_in_basket and discounted_product_in_basket:
                     if action == 'delete':
                         total_discount_reduction += (
@@ -316,7 +330,8 @@ def update_basket(request):
                             round(discounted_product_in_basket.product.price * discounted_product_in_basket.product.discount,
                                   2) * discounted_product_in_basket.quantity + promotion.discount
                         )
-                        bundles_to_delete.append((primary_product_in_basket, discounted_product_in_basket))
+                        bundles_to_delete.append(
+                            (primary_product_in_basket, discounted_product_in_basket))
                     else:
                         return JsonResponse({'error': 'Both promotional products are in the basket. No action taken.'}, status=400)
 
@@ -324,7 +339,8 @@ def update_basket(request):
                 for primary_item, discounted_item in bundles_to_delete:
                     primary_item.delete()
                     discounted_item.delete()
-                basket.total_price -= total_discount_reduction - sum([promotion.discount for promotion in promotions])
+                basket.total_price -= total_discount_reduction - \
+                    sum([promotion.discount for promotion in promotions])
                 basket.save()
                 return JsonResponse({'success': 'Bundle(s) deleted'}, status=200)
 
@@ -355,6 +371,7 @@ def update_basket(request):
             return JsonResponse({'error': 'Basket item not found.'}, status=404)
         except Basket.DoesNotExist:
             return JsonResponse({'error': 'Basket not found.'}, status=404)
+
 
 @csrf_exempt
 def merge_baskets(request):
@@ -416,7 +433,6 @@ def user_basket(request, user_id=None):
                 serialized_item['variant'] = variant_details
                 serialized_item['total_price'] = basket.total_price
                 serialized_data.append(serialized_item)
-            # Return the response here
             return JsonResponse(serialized_data, safe=False)
         else:
             if session_key:
@@ -455,7 +471,7 @@ def product_list(request):
                 products = Product.objects.filter(created_at__gte=one_week_ago)
             else:
                 products = Product.objects.filter(
-                product_type__type=product_type, created_at__gte=one_week_ago)
+                    product_type__type=product_type, created_at__gte=one_week_ago)
         elif product_type == 'All':
             products = Product.objects.filter(category=category)
         elif product_type is None and category is None:
@@ -586,13 +602,13 @@ def product_type(request):
     product_types = ProductType.objects.all()
 
     if category is not None:
-        
+
         product_count_per_type = {}
         if category == 'New':
             one_week_ago = datetime.now() - timedelta(days=7)
             for product_type in product_types:
                 count = Product.objects.filter(
-                     product_type=product_type, created_at__gte=one_week_ago).count()
+                    product_type=product_type, created_at__gte=one_week_ago).count()
                 product_count_per_type[product_type.id] = count
         else:
             for product_type in product_types:
@@ -656,8 +672,8 @@ def create_payment(request):
                 order=order,
                 card_number_obfuscated=obfuscated_card_number,
                 amount=total_price,
-                expiry_date = expiry_date,
-                payment_date = payment_date
+                expiry_date=expiry_date,
+                payment_date=payment_date
             )
             eligible_templates = VoucherTemplate.objects.filter(
                 required_cash_spent__lte=total_price).order_by('-required_cash_spent')
@@ -687,16 +703,21 @@ def create_payment(request):
 
 @csrf_exempt
 def create_order(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        user_id = data.get('user_id')
-        session_key = request.META.get('HTTP_X_SESSION_KEY')
-        delivery_name = data.get('delivery_method')
-        delivery_method = DeliveryMethod.objects.get(name=delivery_name)
+    data = json.loads(request.body.decode('utf-8'))
+    user_id = data.get('user_id')
+    session_key = request.META.get('HTTP_X_SESSION_KEY')
+    delivery_name = data.get('delivery_method')
+    delivery_method = DeliveryMethod.objects.get(name=delivery_name)
+
+    try:
         if user_id:
             user = User.objects.get(pk=user_id)
             basket = Basket.objects.filter(user=user).exclude(
                 order__isnull=False).order_by('-created_at').first()
+
+            if not basket:
+                return JsonResponse({'error': 'Basket not found'}, status=404)
+
             delivery_defaults = {
                 'city': data.get('city'),
                 'street': data.get('street'),
@@ -712,17 +733,36 @@ def create_order(request):
             delivery = Delivery.objects.create(**delivery_defaults)
             order = Order.objects.create(
                 basket=basket, delivery=delivery, user=user)
-            staff_users = User.objects.filter(is_staff=True)
+
+            basket_items = BasketItem.objects.filter(basket=basket)
+            item_details = "\n".join(
+                [f"{item.product.name} - {item.quantity}" for item in basket_items])
+            print(item_details)
+
+            subject = f'Order {order.id} on Lk-commerce'
             message = (
-                  f'New order with Id {order.id} has been created'
+                f'Thank you for ordering from Lk-commerce!\n\n'
+                f'Your order includes:\n\n'
+                f'{item_details}\n\n'
+                f'Order ID: {order.id}'
             )
-            for staff_user in staff_users:
-                notification = Notification.objects.create(user=staff_user, message = message)
-                notification.save()
+            send_mail(
+                subject,
+                message,
+                'no-reply@lk-commerce.com',
+                [data.get('email')],
+                fail_silently=False,
+            )
+            send_notifications_to_staff(order.id)
             return JsonResponse({'success': 'Order created', 'order_id': order.id}, status=200)
+
         elif session_key:
             temporary_basket = TemporaryBasket.objects.filter(session_key=session_key).exclude(
                 order__isnull=False).order_by('-created_at').first()
+
+            if not temporary_basket:
+                return JsonResponse({'error': 'Temporary basket not found'}, status=404)
+
             delivery_defaults = {
                 'city': data.get('city'),
                 'street': data.get('street'),
@@ -735,13 +775,49 @@ def create_order(request):
                 'email': data.get('email')
             }
             delivery = Delivery.objects.create(**delivery_defaults)
-            Order.objects.create(
+            order = Order.objects.create(
                 temporary_basket=temporary_basket, delivery=delivery)
-            return JsonResponse({'success': 'Order created'}, status=200)
-    else:
-        return JsonResponse({'error': 'Invalid method'}, status=405)
 
+            temporary_basket_items = TemporaryBasketItem.objects.filter(
+                temporary_basket=temporary_basket)
+            item_details = "\n".join(
+                [f"{item.product.name} - {item.quantity}" for item in temporary_basket_items])
 
+            subject = f'Order {order.id} on Lk-commerce'
+            message = (
+                f'Thank you for ordering from Lk-commerce!\n\n'
+                f'Your order includes:\n\n'
+                f'{item_details}\n\n'
+                f'Order ID: {order.id}'
+            )
+            send_mail(
+                subject,
+                message,
+                'no-reply@lk-commerce.com',
+                [data.get('email')],
+                fail_silently=False,
+            )
+            send_notifications_to_staff(order.id)
+            return JsonResponse({'success': 'Order created', 'order_id': order.id}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+def send_notifications_to_staff(order_id):
+    staff_users = User.objects.filter(is_staff=True)
+    message = f'New order with Id {order_id} has been created'
+
+    if not staff_users.exists():
+        logger.warning("No staff users found for notification")
+        return
+
+    for staff_user in staff_users:
+        try:
+            Notification.objects.create(user=staff_user, message=message)
+            logger.info(f"Notification sent to {staff_user.email}")
+        except Exception as e:
+            logger.error(f"Error creating notification for {staff_user.email}: {e}")
+        
 def order_list(request):
     if request.method == 'GET':
 
@@ -796,8 +872,20 @@ def update_order(request):
                 if getattr(order, 'basket', None) is not None:
                     user = order.user
                     total_price = order.basket.total_price
+                    items = BasketItem.objects.filter(basket=order.basket)
+                    for item in items:
+                         if item.variant:
+                            variant = item.variant
+                            variant.stock -= item.quantity
+                            variant.save()   
                 elif getattr(order, 'temporary_basket', None) is not None:
                     total_price = order.temporary_basket.total_price
+                    items = TemporaryBasketItem.objects.filter(temporary_basket=order.temporary_basket)
+                    for item in items:
+                         if item.variant:
+                            variant = item.variant
+                            variant.stock -= item.quantity
+                            variant.save()   
                 else:
                     return JsonResponse({'error': 'No basket found'}, status=404)
                 eligible_templates = VoucherTemplate.objects.filter(
@@ -1008,7 +1096,8 @@ def set_recovered_password(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-@csrf_exempt 
+
+@csrf_exempt
 def create_promotion_bundle(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -1029,14 +1118,16 @@ def create_promotion_bundle(request):
                 promotion.save()
                 return JsonResponse({'success': 'Bundle created successfully'}, status=200)
             else:
-                promotion, created = ProductsPromotion.objects.get_or_create(primary_product=primary_product, discounted_product=discounted_product, discount=discount)
-                if not created: 
+                promotion, created = ProductsPromotion.objects.get_or_create(
+                    primary_product=primary_product, discounted_product=discounted_product, discount=discount)
+                if not created:
                     return JsonResponse({'error': 'Bundle already exists'}, status=403)
                 else:
                     promotion.save()
                     return JsonResponse({'success': 'Bundle created successfully'}, status=200)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
+
 
 def user_list(request):
     if request.method == 'GET':
@@ -1045,6 +1136,8 @@ def user_list(request):
         return JsonResponse(serializer.data, safe=False)
     else:
         return JsonResponse({'error', 'Invalid request method'}, status=400)
+
+
 @csrf_exempt
 def email_customer(request):
     parser_classes = (JSONParser, MultiPartParser)
@@ -1058,17 +1151,20 @@ def email_customer(request):
             body = request.POST.get('body')
             email_from = 'lkcommercetest@gmail.com'
             recipient_list = [email]
-            email_message = EmailMessage(subject, body, email_from, recipient_list)
+            email_message = EmailMessage(
+                subject, body, email_from, recipient_list)
             for key, file in request.FILES.items():
                 if hasattr(file, 'name'):
-                    email_message.attach(file.name, file.read(), file.content_type)
+                    email_message.attach(
+                        file.name, file.read(), file.content_type)
             email_message.send()
         else:
             return JsonResponse({'error': 'User does not exist'}, status=404)
         return JsonResponse({'success': 'Email send succesfully'}, status=200)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
-    
+
+
 @csrf_exempt
 def payment_list(request):
     if request.method == 'GET':
@@ -1077,7 +1173,8 @@ def payment_list(request):
         return JsonResponse(serializer.data, safe=False)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
-    
+
+
 @csrf_exempt
 def popular_types(request):
     types = ProductType.objects.all()
@@ -1085,8 +1182,8 @@ def popular_types(request):
     for type in types:
         type_dict = {"type": type.type, "count": 0}
         type_counts.append(type_dict)
-    if request.method == 'GET':  
-        orders = Order.objects.all()       
+    if request.method == 'GET':
+        orders = Order.objects.all()
         for order in orders:
             if order.basket:
                 basket = order.basket
@@ -1097,19 +1194,21 @@ def popular_types(request):
                 for type_dict in type_counts:
                     if type_dict["type"] == product_type:
                         type_dict["count"] += 1
-                        break 
+                        break
         return JsonResponse({"type_counts": type_counts})
     else:
-        return JsonResponse({'error': 'Invalid request methods'}, status=400) 
-    
+        return JsonResponse({'error': 'Invalid request methods'}, status=400)
+
+
 def popular_products(request):
     products = Product.objects.all()
     product_counts = []
     for product in products:
-        product_dict = {"product": product.id, "product_name": product.name, "product_category": product.category, "count": 0}
+        product_dict = {"product": product.id, "product_name": product.name,
+                        "product_category": product.category, "count": 0}
         product_counts.append(product_dict)
-    if request.method == 'GET':  
-        orders = Order.objects.all()       
+    if request.method == 'GET':
+        orders = Order.objects.all()
         for order in orders:
             if order.basket:
                 basket = order.basket
@@ -1119,14 +1218,16 @@ def popular_products(request):
                 for product_dict in product_counts:
                     if product_dict["product"] == product.id:
                         product_dict["count"] += 1
-                        break 
-        sorted_product_counts = sorted(product_counts, key=lambda x: x['count'], reverse=True)
+                        break
+        sorted_product_counts = sorted(
+            product_counts, key=lambda x: x['count'], reverse=True)
         top_10_products = sorted_product_counts[:10]
         return JsonResponse({"product_counts": top_10_products})
     else:
-        return JsonResponse({'error': 'Invalid request method'}, status=400) 
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-@csrf_exempt    
+
+@csrf_exempt
 def unread_notifications(request):
     notifications = Notification.objects.filter(is_read=False)
     if request.method == 'GET':
@@ -1134,7 +1235,9 @@ def unread_notifications(request):
         return JsonResponse(serializer.data, safe=False)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
-@csrf_exempt    
+
+
+@csrf_exempt
 def all_notifications(request):
     notifications = Notification.objects.all()
     if request.method == 'GET':
@@ -1143,12 +1246,14 @@ def all_notifications(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
+
 def notification_read(request):
     data = json.loads(request.body)
     notification_id = data.get('notification_id')
     if request.method == 'POST':
         try:
-            notification = Notification.objects.get(notification = notification_id)
+            notification = Notification.objects.get(
+                notification=notification_id)
             notification.is_read = True
             notification.save()
             return JsonResponse({'success': 'Notification read'})
@@ -1157,7 +1262,8 @@ def notification_read(request):
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
 
-@csrf_exempt    
+
+@csrf_exempt
 def mark_all_as_read(request):
     data = json.loads(request.body)
     user = data.get('user_id')
@@ -1167,6 +1273,13 @@ def mark_all_as_read(request):
             notification.is_read = True
             notification.save()
         return JsonResponse({'success': 'All notifications marked as read'})
-    else: 
+    else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
-    
+
+def low_on_stock(request):
+    if request.method == 'GET':
+        variants = ProductVariant.objects.filter(stock__lte=5)
+        serializer = ProductVariantSerializer(variants, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)

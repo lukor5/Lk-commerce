@@ -136,7 +136,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .popup-wrapper {
-  position: absolute;
+  position: fixed;
   display: flex;
   width: 100%;
   min-height: 100vh;
@@ -154,6 +154,7 @@ export default {
     .exit-button {
       position: absolute;
       right: 20px;
+      top: 20px;
 
     }
     .row,

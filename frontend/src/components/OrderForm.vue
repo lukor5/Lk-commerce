@@ -110,11 +110,11 @@
             <p>Delivery: {{ this.shippingPrice }}</p>
             <h2>Total : {{ checkoutPrice }} $</h2>
           </div>
-          <div class="order-button">
+      
             <button class="primary-button" @click.prevent="handleOrderClicked">
               Order
             </button>
-          </div>
+         
         </div>
       </div>
     </div>
@@ -311,15 +311,15 @@ export default {
   &::-webkit-scrollbar-thumb {
     background-color: var(--secondary-color);
     border-radius: 4px;
-    border: 2px solid white;
+    border: 2px solid var(--background-color);
   }
   &::-webkit-scrollbar-thumb:hover {
-    background-color: white;
+    background-color: var(--background-color);
     border-radius: 4px;
     border: 2px solid var(--secondary-color);
   }
   &::-webkit-scrollbar-track {
-    background: white;
+    background: var(--background-color);
   }
 
   .form-wrapper {
@@ -393,7 +393,17 @@ export default {
     .column-right {
       display: grid;
       grid-template-columns: auto;
-      gap: 40px;
+      gap: auto;
+      .bottom {
+        display: flex;
+        flex-direction: row;
+        height: fit-content;
+        justify-content: space-around;
+        button {
+          flex: 0.5;
+        }
+       
+      }
     }
   }
 }

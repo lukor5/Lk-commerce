@@ -75,25 +75,24 @@ export default {
     return {
       baseUrl: this.$baseUrl,
       files: [],
-      subject: '',
-      body: ''
+      subject: "",
+      body: "",
     };
   },
   methods: {
     sendEmail() {
-        const formData = new FormData()
-        formData.append('user', JSON.stringify(this.userToEmail))
-        formData.append('subject', this.subject)
-        formData.append('body', this.body)
-        this.files.forEach((file, index) => {
+      const formData = new FormData();
+      formData.append("user", JSON.stringify(this.userToEmail));
+      formData.append("subject", this.subject);
+      formData.append("body", this.body);
+      this.files.forEach((file, index) => {
         formData.append(`files[${index}]`, file);
       });
-      console.log(formData)
       axios
         .post(`${this.baseUrl}/email-customer`, formData, {
-            headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         })
         .then((response) => {
           console.log(response);
@@ -110,7 +109,6 @@ export default {
     },
   },
   mounted() {
-    console.log(this.userToEmail);
   },
 };
 </script>
@@ -118,7 +116,7 @@ export default {
 <style lang="scss" scoped>
 @import "../../assets/styles/main.scss";
 .popup-wrapper {
-    position: absolute;
+  position: fixed;
   display: flex;
   width: 100%;
   height: 100vh;
@@ -230,7 +228,7 @@ export default {
       width: 95%;
       .input-label {
         .buttons {
-            flex-direction: column;
+          flex-direction: column;
         }
       }
     }
