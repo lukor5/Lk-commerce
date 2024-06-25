@@ -210,7 +210,7 @@ export default {
 .product-list-wrapper {
   display: flex;
   flex-direction: row;
-  height: 100%;
+  height: 100vh;
   overflow-y: scroll;
   flex-wrap: wrap;
   &::-webkit-scrollbar {
@@ -252,6 +252,13 @@ export default {
     padding-inline: 50px;
     align-items: center;
     gap: 5px;
+    .common-dropdown-wrapper {
+      .category-dropdown-wrapper {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+      }
+    }
   }
 
   .small-nav {

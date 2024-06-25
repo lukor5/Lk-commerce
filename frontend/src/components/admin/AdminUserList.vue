@@ -7,7 +7,7 @@
 <div class="grid-container">
     
     <div class="users">
-        <div  v-for="(user, index) in filteredUserList" :key="index" class="admin-grid-item">
+        <div  v-for="(user, index) in paginatedUserList" :key="index" class="admin-grid-item">
             <div class="row">
         <h2>{{ user.username }}</h2>
         <div class="user-status-active" v-if="user.is_active == true">Active</div>
@@ -40,28 +40,32 @@
         <div class="row">
             <div class="buttons">
             <button @click="handleSendEmail(user)" class="primary-button">Send Email</button>
-            <button class="primary-button">Orders</button>
+            <button @click="handleGetUserOrders(user.username)" class="primary-button">Orders</button>
             </div>
         </div>
         </div>
     </div>
 </div>
+<AdminPagination @page-clicked="handlePageClicked" :length="filteredUserList.length" :perPage="9"/>
 </div>
 </template>
 
 <script>
 import axios from 'axios'
 import AdminSearchBar from './AdminSearchBar.vue'
+import AdminPagination from './AdminPagination.vue';
 export default {
     name: 'AdminUserList',
     components: {
-        AdminSearchBar
+        AdminSearchBar,
+        AdminPagination
     },
     data() {
         return {
             users: [],
             baseUrl: this.$baseUrl,
-            searchPhrase: ''
+            searchPhrase: '',
+            currentPage: 0
         }
     },
     computed: {
@@ -72,6 +76,11 @@ export default {
         user.first_name.toLowerCase().includes(searchPhrase.toLowerCase())||
         user.last_name.toLowerCase().includes(searchPhrase.toLowerCase()))
     
+        },
+        paginatedUserList() {
+            const start = this.currentPage * 9;
+            const end = start + 9;
+            return this.filteredUserList.slice(start, end);
         }
     },
     methods: {
@@ -99,6 +108,12 @@ export default {
         },
         handleSearchInput(string) {
             this.searchPhrase = string
+        },
+        handleGetUserOrders(username) {
+            this.$router.push({ path: '/admin/orders', query: { username: username } });
+        },
+        handlePageClicked(pageIndex) {
+            this.currentPage = pageIndex
         }
     },
     mounted() {

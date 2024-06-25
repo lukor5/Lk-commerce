@@ -23,6 +23,7 @@
     ></div>
     <div class="hero-wrapper">
       <NavBar
+        @navbar-height="navBarHeight = $event"
         @login-clicked="handleLoginClicked"
         @result="handleResult"
         @option-clicked="handleOptionClicked"
@@ -30,7 +31,10 @@
         @product-clicked="handleProductClicked"
         :username="username"
       />
-      <QuickList @scroll-to-promotions="handleScrollToPromotions" />
+      <QuickList
+        @scroll-to-promotions="handleScrollToPromotions" 
+        @quick-access-height="quickAccessHeight = $event"
+      />
       <router-view
         @product-clicked="handleProductClicked"
         @rating-clicked="handleRatingClicked"
@@ -42,6 +46,7 @@
         @close-popup="closePopup('payment')"
         @payment-success="handlePaymentSuccess"
         @add-promotion-bundle="handleAddPromotionBundle"
+        :quickAccessHeight="quickAccessHeight" :navBarHeight="navBarHeight"
       />
     </div>
     <ShopReadme v-if="showShopReadmePopup" @notice-read="handleNoticeRead" />
@@ -153,6 +158,8 @@ export default {
       ratingData: [],
       orderId: null,
       promotionBundle: [],
+      quickAccessHeight: 0,
+      navBarHeight: 0,
     };
   },
   
@@ -337,6 +344,7 @@ export default {
     this.fetchVouchers(this.user.id);
     this.getDarkModeCookie();
     this.getReadmeCookie();
+
   },
   created() {
     this.fetchInitialProductData();
@@ -371,7 +379,7 @@ body {
 
 .hero-wrapper {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
 
   margin-inline: 5%;
   flex-direction: column;

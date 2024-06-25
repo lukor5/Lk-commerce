@@ -1,43 +1,54 @@
 <template>
-    <div class="readme-wrapper">
-      <div class="readme">
-        <h1>Important Notice</h1>
-        <h2>About This Project</h2>
-        <div class="details">
-          <p>This web-commerce project has been developed to demonstrate my technical skills and expertise in web development to potential employers.</p>
-          <p>All products showcased are generated via scripts, and all images used are stock photos.</p>
-          <p>For demonstration purposes, please use the following dummy payment card number: <b>4444 3333 2222 1111</b> with any CVV and expiry date.</p>
-          <p>You can access the admin panel by adding <b>"/admin"</b> to Url and logging in with following credentials: </p>
-          <p><b>Login:</b> Admin <b>Password:</b> lkcommerceadmin</p>
-          <p>The website is hosted on Amazon Web Services (AWS).</p>
-        </div>
-        <button @click="emitNoticeRead">Ok</button>
+  <div class="readme-wrapper">
+    <div class="readme">
+      <h1>Important Notice</h1>
+      <h2>About This Project</h2>
+      <div class="details">
+        <p>
+          This web-commerce project has been developed to demonstrate my
+          technical skills and expertise in web development to potential
+          employers.
+        </p>
+        <p>
+          All products showcased are generated via scripts, and all images used
+          are stock photos.
+        </p>
+        <p>
+          For demonstration purposes, please use the following dummy payment
+          card number: <b>4444 3333 2222 1111</b> with any CVV and expiry date.
+        </p>
+        <p>
+          You can access the admin panel by adding <b>"/admin"</b> to Url and
+          logging in with following credentials:
+        </p>
+        <p><b>Login:</b> Admin <b>Password:</b> lkcommerceadmin</p>
+        <p>The website is hosted on Amazon Web Services (AWS).</p>
       </div>
+      <button @click="emitNoticeRead">Ok</button>
     </div>
-  </template>
+  </div>
+</template>
 <script>
 export default {
-    name: 'ShopReadme',
-    data() {
-
+  name: "ShopReadme",
+  data() {},
+  methods: {
+    emitNoticeRead() {
+      this.$emit("notice-read");
     },
-    methods: {
-      emitNoticeRead() {
-        this.$emit('notice-read')
-      }
-    }
-}
+  },
+};
 </script>
 <style lang="scss" scoped>
-@import '../assets/styles/main.scss';
+@import "../assets/styles/main.scss";
 .readme-wrapper {
-    position: absolute;
-    z-index: 9999;
+  position: absolute;
+  z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
- 
+
   min-height: 100vh;
   width: 100vw;
 }
@@ -81,8 +92,6 @@ export default {
     p {
       margin-bottom: 15px;
     }
-
-
   }
 }
 </style>

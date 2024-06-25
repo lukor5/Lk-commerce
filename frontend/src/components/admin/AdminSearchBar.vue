@@ -5,7 +5,8 @@
 export default {
     name: 'AdminSearchBar',
     props: {
-        placeholder: String
+        placeholder: String,
+        userToSearch: String
     },
     data() {
         return {
@@ -15,6 +16,11 @@ export default {
     methods: {
         emitInput() {
             this.$emit('search-input', this.searchPhrase)
+        }
+    },
+    mounted(){
+        if(this.userToSearch) {
+            this.searchPhrase = this.userToSearch
         }
     }
 }

@@ -5,7 +5,7 @@
         </div>
     <div class="grid-container">
         <div class="bundles">
-    <div v-for="(promotion, index) in filteredPromotionList" :key="index" class="admin-grid-item">
+    <div v-for="(promotion, index) in paginatedPromotionList" :key="index" class="admin-grid-item">
         <div class="row"><PreviewProduct :product="promotion.primary_product"/> <PreviewProduct :product="promotion.discounted_product"/></div>
         <div class="bottom-row">
             <div >
@@ -17,23 +17,27 @@
     </div>
     </div>
     </div>
+    <AdminPagination @page-clicked="handlePageClicked" :length="filteredPromotionList.length" :perPage="9"/>
     </div>
 </template>
 <script>
 import axios from 'axios';
 import PreviewProduct from '../PreviewProduct.vue';
 import AdminSearchBar from './AdminSearchBar.vue';
+import AdminPagination from './AdminPagination.vue';
 export default {
     name: 'AdminBundleList',
     components: {
         PreviewProduct,
-        AdminSearchBar
+        AdminSearchBar,
+        AdminPagination
     },
     data() {
         return {
             baseUrl: this.$baseUrl,
             promotions: [],
-            searchPhrase: ''
+            searchPhrase: '',
+            currentPage: 0,
         }
     },
     computed: {
@@ -42,7 +46,12 @@ export default {
             return this.promotions.filter((promotion) =>
             promotion.primary_product.name.toLowerCase().includes(searchPhrase.toLowerCase()) ||
             promotion.discounted_product.name.toLowerCase().includes(searchPhrase.toLowerCase()))
-        }
+        },
+        paginatedPromotionList() {
+      const start = this.currentPage * 9;
+      const end = start + 9;
+      return this.filteredPromotionList.slice(start, end);
+    },
     },
     methods: {
         getPromotionBundles() {
@@ -51,6 +60,9 @@ export default {
             }).catch(error => {
                 console.log('error', error)
             })
+        },
+        handlePageClicked(pageIndex) {
+            this.currentPage = pageIndex; 
         },
         handleSearchInput(string){
             this.searchPhrase = string

@@ -26,6 +26,9 @@ export default {
       this.$emit('scroll-to-promotions')
     }
   },
+  mounted() {
+    this.$emit('quick-access-height', this.$el.clientHeight);
+  }
 };
 </script>
 
