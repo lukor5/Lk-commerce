@@ -1,6 +1,6 @@
 <template>
   <div class="canvas-wrapper">
-    <h3>Shekels received in last 6 months</h3>
+    <h3>Sales in last 6 months:</h3>
     <canvas id="myChart"></canvas>
   </div>
 </template>
@@ -45,7 +45,7 @@ export default {
           labels: chartData.labels,
           datasets: [
             {
-              label: "Total payments",
+              label: "Total sales",
               data: chartData.data,
               backgroundColor: this.generateColors(chartData.labels.length),
               borderWidth: 1,

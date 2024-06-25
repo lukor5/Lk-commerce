@@ -252,6 +252,7 @@ export default {
     },
   },
   mounted() {
+    this.$emit('navbar-height', this.$el.clientHeight);
     document.body.addEventListener("click", this.closeDropdowns);
     this.getProducts();
     this.getDarkModeCookie();
@@ -369,6 +370,7 @@ export default {
       gap: 10px;
       justify-content: space-between;
       background-color: var(--background-color);
+      border: 1px solid var(--background-color);
       border-bottom: 1px solid var(--secondary-color);
       padding: 5px;
     }

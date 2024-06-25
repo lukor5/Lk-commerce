@@ -12,7 +12,7 @@
           showCreateBundle ||
           showOrderPopup ||
           showProductPopup ||
-          showEmailPopup
+          showEmailPopup,
       }"
     ></div>
     <AdminNavBar
@@ -23,46 +23,73 @@
       @go-home="handleGoHome"
     />
     <div class="main">
-      <router-view v-if="isRouterView" @send-email-clicked="handleEmailClicked" @order-clicked="handleOrderClicked" @bundle-clicked="handleBundleClicked" ></router-view>
-      <div class="chart-grid-wrapper" v-else  >
-        <div class="charts">
-        <SalesChart/>
-        <CategoryChart/>
+      <router-view
+        v-if="isRouterView"
+        @send-email-clicked="handleEmailClicked"
+        @order-clicked="handleOrderClicked"
+        @bundle-clicked="handleBundleClicked"
+      ></router-view>
+      <div class="admin-content" v-else>
+        <div class="warning-container">
+          <font-awesome-icon
+            :icon="['fas', 'triangle-exclamation']"
+            class="fa-lg"
+          />
+          <b>Warning!</b>
+          <p>{{ lowStockCount }} product variants on low stock!</p>
         </div>
-        <div class="grid-container">
-          <h1>Administrator Panel</h1>
-        <div class="nav-grid">
-          <div class="column">
-            <button @click="redirectTo('Bundles')" class="button-big"><h2>Bundles</h2></button>
-            <button @click="redirectTo('Orders')" class="button-big"><h2>Orders</h2></button>
+        <div class="chart-grid-wrapper">
+          <div class="charts">
+            <SalesChart />
+            <CategoryChart />
           </div>
-          <div class="column">
-            <button @click="redirectTo('Users')" class="button-big"><h2>Users</h2></button>
-            <button @click="redirectTo('Payments')" class="button-big"><h2>Payments</h2></button>
+          <div class="grid-container">
+            <h1>Administrator Panel</h1>
+            <div class="nav-grid">
+              <div class="column">
+                <button @click="redirectTo('Bundles')" class="button-big">
+                  <h2>Bundles</h2>
+                </button>
+                <button @click="redirectTo('Orders')" class="button-big">
+                  <h2>Orders</h2>
+                </button>
+              </div>
+              <div class="column">
+                <button @click="redirectTo('Users')" class="button-big">
+                  <h2>Users</h2>
+                </button>
+                <button @click="redirectTo('Payments')" class="button-big">
+                  <h2>Payments</h2>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      </div>
-      </div>
+    </div>
   </div>
   <AddProductPopup
-      v-if="showProductPopup"
-      @result="handleResultMessage"
-      @close-popup="handleClosePopup('AddProductPopup')"
-      :productId="productId"
-    />
-    <EditOrderPopup
-      v-if="showOrderPopup"
-      :order="selectedOrder"
-      @close-popup="handleClosePopup('EditOrderPopup')"
-    />
-    <CreateBundlePopup
-      v-if="showCreateBundle"
-      @close-popup="handleClosePopup('CreateBundlePopup')"
-      @result="handleResultMessage"
-      :promotion="promotion"
-    />
-    <SendEmailPopup v-if="showEmailPopup" @close-popup="handleClosePopup('SendEmailPopup')" :userToEmail="userToEmail"/>
+    v-if="showProductPopup"
+    @result="handleResultMessage"
+    @close-popup="handleClosePopup('AddProductPopup')"
+    :productId="productId"
+  />
+  <EditOrderPopup
+    v-if="showOrderPopup"
+    :order="selectedOrder"
+    @close-popup="handleClosePopup('EditOrderPopup')"
+  />
+  <CreateBundlePopup
+    v-if="showCreateBundle"
+    @close-popup="handleClosePopup('CreateBundlePopup')"
+    @result="handleResultMessage"
+    :promotion="promotion"
+  />
+  <SendEmailPopup
+    v-if="showEmailPopup"
+    @close-popup="handleClosePopup('SendEmailPopup')"
+    :userToEmail="userToEmail"
+  />
 </template>
 
 <script>
@@ -77,13 +104,13 @@ import SalesChart from "./SalesChart.vue";
 import CategoryChart from "./CategoryChart.vue";
 import { mapState } from "vuex";
 import { useRoute } from "vue-router";
-
+import axios from "axios";
 
 export default {
   name: "AdminPanel",
   setup() {
-    const route = useRoute()
-    return {route}
+    const route = useRoute();
+    return { route };
   },
   components: {
     LoginPopup,
@@ -95,7 +122,6 @@ export default {
     CreateBundlePopup,
     SalesChart,
     CategoryChart,
-
   },
   computed: {
     ...mapState(["user"]),
@@ -104,8 +130,11 @@ export default {
     },
     isRouterView() {
       let path = this.route.path;
-      return path.startsWith('/admin') && path.length > '/admin'.length;
-    }
+      return path.startsWith("/admin") && path.length > "/admin".length;
+    },
+    lowStockCount() {
+      return this.lowStockVariants.length;
+    },
   },
   data() {
     return {
@@ -120,7 +149,8 @@ export default {
       promotion: null,
       messages: [],
       userToEmail: null,
-      baseUrl: this.$baseUrl
+      lowStockVariants: [],
+      baseUrl: this.$baseUrl,
     };
   },
   methods: {
@@ -157,7 +187,7 @@ export default {
       this.showProductPopup = true;
     },
     handleEmailClicked(user) {
-      this.userToEmail = user
+      this.userToEmail = user;
       this.showEmailPopup = !this.showEmailPopup;
     },
     handleOrderClicked(order) {
@@ -165,23 +195,25 @@ export default {
       this.showOrderPopup = !this.showOrderPopup;
     },
     handleBundleClicked(promotion) {
-      console.log('bundl-clickd')
-      this.promotion = promotion
-      console.log('prom', this.promotion)
-      this.showCreateBundle = !this.showCreateBundle
+      this.promotion = promotion;
+      this.showCreateBundle = !this.showCreateBundle;
     },
     handleResultMessage(result) {
-      this.messages = result;
-      this.showResultPopup = !this.showResultPopup;
-      setTimeout(() => {
-        this.showResultPopup = !this.showResultPopup;
-      }, 4000);
+      this.showResultPopup = false;
+      this.$nextTick(() => {
+        if (Array.isArray(result)) {
+          this.messages = result;
+        } else {
+          this.messages = [result];
+        }
+        this.showResultPopup = true;
+      });
     },
     handleGoHome() {
-      this.showCreateBundle = false
-      this.showOrderPopup = false
-      this.showOrders = false
-      this.showProductPopup = false
+      this.showCreateBundle = false;
+      this.showOrderPopup = false;
+      this.showOrders = false;
+      this.showProductPopup = false;
     },
     handleShowOrders() {
       this.showOrders = true;
@@ -189,19 +221,32 @@ export default {
     handleShowCreateBundle() {
       this.showCreateBundle = true;
     },
+    handleWarningClicked() {
+      this.$router.push("/");
+    },
+    getLowOnStock() {
+      axios
+        .get(`${this.baseUrl}/low-stock`)
+        .then((response) => {
+          this.lowStockVariants = response.data;
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
+    },
     redirectTo(name) {
       switch (name) {
-        case 'Orders':
-          this.$router.push('/admin/orders')
+        case "Orders":
+          this.$router.push("/admin/orders");
           break;
-        case 'Bundles':
-          this.$router.push('/admin/bundles')
+        case "Bundles":
+          this.$router.push("/admin/bundles");
           break;
-        case 'Users':
-          this.$router.push('/admin/users')
+        case "Users":
+          this.$router.push("/admin/users");
           break;
-        case 'Payments':
-          this.$router.push('/admin/payments')
+        case "Payments":
+          this.$router.push("/admin/payments");
           break;
         default:
           break;
@@ -209,6 +254,7 @@ export default {
     },
   },
   mounted() {
+    this.getLowOnStock();
   },
 };
 </script>
@@ -229,89 +275,110 @@ export default {
     height: 100%;
     flex-wrap: wrap;
     overflow-y: scroll;
-    .chart-grid-wrapper {
-      display: flex;
-      flex-direction: row;
-    flex: 1;
-    width: 100%;
-    justify-content: center;
-    height: 100%;
-    margin-inline: 5vw;
-    .charts {
+    .admin-content {
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      width: 35%;
-    }
-      .grid-container {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      margin-bottom: 10vh;
-      
-  }
-    
-    .nav-grid {
-      display: grid;
-      grid-template-columns: auto auto;
-      gap: 10px;
+      margin-inline: 5vw;
+      width: 100%;
       height: 100%;
-      .column {
-        display: grid;
-        grid-template-rows: auto auto;
+      gap: 10px;
+      .warning-container {
+        display: inline-flex;
+        width: fit-content;
         gap: 10px;
-        .button-big {
-          border: 1px solid var(--border-color);
-          text-align: center;
-          h2 {
-            font-size: 30px;
-            letter-spacing: 3px;
+        padding: 5px;
+        padding-inline: 10px;
+        border-radius: 15px;
+        border: 1px solid var(--secondary-color);
+        background-color: var(--secondary-color);
+        color: white;
+      }
+      .chart-grid-wrapper {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+        width: 100%;
+        gap: 20px;
+        justify-content: center;
+        .charts {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          width: 35%;
+        }
+        .grid-container {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          margin-bottom: 15px;
+        }
+
+        .nav-grid {
+          display: grid;
+          grid-template-columns: auto auto;
+          gap: 10px;
+          height: 100%;
+          .column {
+            display: grid;
+            grid-template-rows: auto auto;
+            gap: 10px;
+            .button-big {
+              border: 1px solid var(--border-color);
+              text-align: center;
+              h2 {
+                font-size: 30px;
+                letter-spacing: 3px;
+              }
+            }
+            .button-big:hover {
+              background-color: var(--primary-color);
+              color: white;
+            }
           }
         }
-        .button-big:hover {
-          background-color: var(--primary-color);
-          color: white;
+      }
+    }
+  }
+}
+@media (max-width: 1200px) {
+  .admin-panel-wrapper {
+    .main {
+      .admin-content {
+        .chart-grid-wrapper {
+          flex-direction: column-reverse;
+          gap: 0px;
+          .charts {
+            flex-direction: row;
+            width: 100%;
+            justify-content: center;
+            .canvas-wrapper {
+              width: 40vw;
+              max-height: 50vh;
+            }
+          }
         }
       }
-    
-  }
-}
-  }
-}
-@media(max-width: 1200px) {
-  .admin-panel-wrapper{
-    .main{
-  .chart-grid-wrapper {
-    flex-direction: column-reverse;
-    .charts {
-      flex-direction: row;
-      width: 100%;
-      justify-content: center;
-      .canvas-wrapper {
-        width: 40vw;
-        max-height: 50vh;
-      }
     }
   }
 }
-  }
-}
-@media(max-width: 800px) {
-  .admin-panel-wrapper{
-    .main{
-  .chart-grid-wrapper {
-    .charts {
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      .canvas-wrapper {
-        flex: 0;
-        width: 70%;
-        max-height: 50vh;
+@media (max-width: 800px) {
+  .admin-panel-wrapper {
+    .main {
+      .admin-content {
+        .chart-grid-wrapper {
+          .charts {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            .canvas-wrapper {
+              flex: 0;
+              width: 70%;
+              max-height: 50vh;
+            }
+          }
+        }
       }
     }
-  }
-}
   }
 }
 </style>

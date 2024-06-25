@@ -36,20 +36,22 @@
               <h3>Notifications</h3>
               <div class="top-buttons">
                 <button
-                  class="notification-button" @click="this.active = 'Unread'"
+                  class="notification-button"
+                  @click="this.active = 'Unread'"
                   :class="{ active: active == 'Unread' }"
                 >
                   Unread
                 </button>
                 <button
-                  class="notification-button" @click="this.active = 'All'"
+                  class="notification-button"
+                  @click="this.active = 'All'"
                   :class="{ active: active == 'All' }"
                 >
                   All
                 </button>
               </div>
             </div>
-            <ul v-if="this.active == 'Unread' ">
+            <ul v-if="this.active == 'Unread'">
               <li
                 v-for="(notification, index) in notifications.messages"
                 :key="index"
@@ -65,7 +67,10 @@
                 {{ notification.message }}
               </li>
             </ul>
-            <div v-if="active == 'Unread' && notificationsQuantity > 0" class="bottom">
+            <div
+              v-if="active == 'Unread' && notificationsQuantity > 0"
+              class="bottom"
+            >
               <span>Mark as read</span>
               <input type="checkbox" v-model="markAsRead" />
             </div>
@@ -96,9 +101,9 @@ export default {
       showSearchResults: false,
       showNotificationDropdown: false,
       baseUrl: this.$baseUrl,
-      active: 'Unread',
+      active: "Unread",
       markAsRead: false,
-      allNotifications: []
+      allNotifications: [],
     };
   },
   methods: {
@@ -121,13 +126,14 @@ export default {
     closeDropdowns(event) {
       const isSearchResults =
         event.target.closest(".dropdown-products") !== null;
-      const isNotificationDropdown = event.target.closest(".notifications-button-wrapper") !== null ;
+      const isNotificationDropdown =
+        event.target.closest(".notifications-button-wrapper") !== null;
       if (!isSearchResults) {
         this.showSearchResults = false;
       }
       if (!isNotificationDropdown) {
-    this.showNotificationDropdown = false;
-  }
+        this.showNotificationDropdown = false;
+      }
     },
     handleDropdownToggled(dropdown, type) {
       switch (type) {
@@ -142,24 +148,29 @@ export default {
       }
     },
     fetchAllNotifications() {
-      axios.get(`${this.baseUrl}/all-notifications`).then(response => {
-        console.log(response)
-        this.allNotifications = response.data
-      }).catch(error => {
-        console.log('error', error)
-      })
+      axios
+        .get(`${this.baseUrl}/all-notifications`)
+        .then((response) => {
+          this.allNotifications = response.data;
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
     },
     handleMarkAllAsRead() {
-    const data = {
-      user_id: this.$store.state.user.id
-    }
-    axios.post(`${this.baseUrl}/mark-all-as-read`, data).then(response => {
-      if(response.status == 200) {
-        this.fetchNotifications()
-      }
-    }).catch(error => {
-      console.log('error', error)
-    })
+      const data = {
+        user_id: this.$store.state.user.id,
+      };
+      axios
+        .post(`${this.baseUrl}/mark-all-as-read`, data)
+        .then((response) => {
+          if (response.status == 200) {
+            this.fetchNotifications();
+          }
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
     },
     goHome() {
       this.$router.push("/admin");
@@ -171,23 +182,23 @@ export default {
   },
   watch: {
     notificationsQuantity(newValue) {
-    if (newValue === 0) {
-      this.active = 'All';
-    } else {
-      this.active = 'Unread';
-    }
-  },
-    markAsRead(newValue) {
-      if(newValue == true){
-        this.handleMarkAllAsRead()
+      if (newValue === 0) {
+        this.active = "All";
+      } else {
+        this.active = "Unread";
       }
     },
-    active(newValue){
-      if(newValue == 'All') {
-        this.fetchAllNotifications()
+    markAsRead(newValue) {
+      if (newValue == true) {
+        this.handleMarkAllAsRead();
       }
-    }
-  }
+    },
+    active(newValue) {
+      if (newValue == "All") {
+        this.fetchAllNotifications();
+      }
+    },
+  },
 };
 </script>
 <style lang="scss" >
@@ -207,6 +218,11 @@ export default {
     align-items: center;
     gap: 10px;
     margin-inline: 5%;
+    button {
+      &:hover {
+        color: var(--primary-color);
+      }
+    }
 
     .search-bar {
       display: flex;

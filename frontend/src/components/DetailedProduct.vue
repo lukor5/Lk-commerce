@@ -304,6 +304,7 @@ export default {
     flex: 1;
     max-width: 100%;
     padding-inline: 5%;
+    gap: 10px;
 
     .product-availability {
       display: flex;

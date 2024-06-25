@@ -15,7 +15,7 @@
       </div>
     </div>
   </div>
-  <div class="pagination">
+  <div v-if="reviews.length > 0" class="pagination">
     <font-awesome-icon :icon="['fas', 'chevron-left']" />
     <button
       @click="changePage(index)"
@@ -25,6 +25,9 @@
       {{ index + 1 }}
     </button>
     <font-awesome-icon :icon="['fas', 'chevron-right']" />
+  </div>
+  <div v-else>
+    <h3>No reviews yet :(</h3>
   </div>
 </template>
 

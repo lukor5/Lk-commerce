@@ -52,10 +52,17 @@
           <div class="input-wrapper">
             <label for="type">Type</label>
             <div class="common-dropdown-wrapper">
-              <span @click="toggleTypeDropdown"
-                >{{ this.selectedType.type }}
-                <font-awesome-icon :icon="['fas', 'caret-down']"
-              /></span>
+              <div
+                v-if="this.selectedType.type"
+                class="primary-button"
+                @click="toggleTypeDropdown"
+              >
+                {{ this.selectedType.type }}
+                <font-awesome-icon :icon="['fas', 'caret-down']" />
+              </div>
+              <div v-else class="primary-button" @click="toggleTypeDropdown">
+                Select type <font-awesome-icon :icon="['fas', 'caret-down']" />
+              </div>
               <div
                 class="common-dropdown-list"
                 :class="{ 'show-dropdown': showDropdown }"
@@ -98,25 +105,31 @@
         </button>
       </form>
       <div class="variants">
-        <h3>Please add variants</h3>
-        <div class="row">
-          <input type="text" v-model="variantSize" placeholder="variant" />
-          <input type="text" v-model="variantColor" placeholder="color" />
-          <input type="number" v-model="variantStock" placeholder="stock" />
-          <button class="icon-button" @click="addVariant">
-            <font-awesome-icon :icon="['fas', 'plus']" />
-          </button>
-        </div>
-        <ul>
-          <li v-for="(variant, index) in this.variants" :key="index">
-            <span>{{ variant.size }}</span
-            ><span>{{ variant.color }}</span
-            ><span>{{ variant.stock }}</span
-            ><button class="icon-button" @click="deleteVariant(index)">
-              <font-awesome-icon :icon="['fas', 'minus']" />
+        <div>
+          <h3>Please add variants</h3>
+          <div class="row">
+            <input type="text" v-model="variantSize" placeholder="size" />
+            <input type="text" v-model="variantColor" placeholder="color" />
+            <input type="number" v-model="variantStock" placeholder="stock" />
+            <button
+              class="primary-button"
+              id="addVariantButton"
+              @click="addVariant"
+            >
+              <span>Add</span><font-awesome-icon :icon="['fas', 'plus']" />
             </button>
-          </li>
-        </ul>
+          </div>
+          <ul>
+            <li v-for="(variant, index) in this.variants" :key="index">
+              <span>{{ variant.size }}</span
+              ><span>{{ variant.color }}</span
+              ><span>{{ variant.stock }}</span
+              ><button class="icon-button" @click="deleteVariant(index)">
+                <font-awesome-icon :icon="['fas', 'minus']" />
+              </button>
+            </li>
+          </ul>
+        </div>
         <div class="image-container">
           <h2>Image</h2>
           <img v-if="selectedImage" :src="selectedImage" />
@@ -252,6 +265,7 @@ export default {
 
     setSelectedType(selectedType) {
       this.selectedType = selectedType;
+      this.showDropdown = false;
     },
     closePopup() {
       this.$emit("close-popup");
@@ -281,7 +295,6 @@ export default {
           (this.variantSize = ""),
             (this.variantColor = ""),
             (this.variantStock = null);
-          this.$emit("result", "Variant added");
         } else {
           this.messages = [];
           this.messages.push(
@@ -316,12 +329,19 @@ export default {
       if (formData) {
         axios
           .post(this.baseUrl + "/create-product", formData)
+          .then((response) => {
+            if (response.status == 200) {
+              this.messages.push("Product added successfully");
+              this.$emit("result", this.messages);
+              this.$emit("close-popup");
+            }
+          })
           .catch((error) => {
             console.log("error:", error);
           });
       }
     },
-    
+
     checkFormValidity() {
       this.messages = [];
       if (!this.isPriceValid) {
@@ -359,8 +379,6 @@ export default {
   height: 100vh;
   width: 100vw;
 
-
-
   .popup {
     position: relative;
     display: flex;
@@ -372,6 +390,11 @@ export default {
     margin: auto;
     .exit-button {
       position: absolute;
+      &:hover {
+        * {
+          color: red;
+        }
+      }
     }
 
     .variants {
@@ -379,6 +402,7 @@ export default {
       display: flex;
       flex-direction: column;
       width: auto;
+      gap: 20px;
       padding: 15px;
 
       ul {
@@ -418,11 +442,16 @@ export default {
 
       .row {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr min-content;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
         text-align: center;
 
         input {
           max-width: 80px;
+        }
+        #addVariantButton {
+          display: flex;
+          gap: 5px;
+          align-items: center;
         }
       }
     }
@@ -432,6 +461,8 @@ export default {
       flex-direction: column;
       align-items: center;
       gap: 15px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 20px;
 
       img {
         max-width: 200px;
@@ -443,6 +474,10 @@ export default {
         background-color: var(--primary-color);
         color: white;
         padding: 10px;
+
+        &:hover {
+          background-color: #222325;
+        }
 
         input {
           display: none;

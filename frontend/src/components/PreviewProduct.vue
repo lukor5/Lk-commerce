@@ -18,7 +18,7 @@
       </div>
       <div class="details-bottom">
         <div class="price-wrapper">
-          <span>
+          <span v-if="hasDiscount">
             <span style="text-decoration: line-through">{{
               product.price + "$"
             }}</span
@@ -79,6 +79,9 @@ export default {
       }
       return sortedVariants;
     },
+    hasDiscount() {
+      return this.product.discount != 1
+    }
   },
   mounted() {},
   watch: {
@@ -105,11 +108,11 @@ export default {
   flex-direction: column;
   position: relative;
   justify-content: space-between;
-  width: auto;
-  max-width: 200px;
-  height: auto;
-  max-height: 400px;
-  flex: 1;
+
+  width: 200px;
+
+  height: 350px;
+
   padding: 20px;
  
 
@@ -125,8 +128,9 @@ export default {
   }
 
   .product-image {
-    height: 100%;
-    object-fit: cover;
+    width: 100%;
+   height: auto;
+   object-fit: cover;
     border-radius: 15px;
   }
 
@@ -148,6 +152,7 @@ export default {
       flex-direction: row;
       justify-content: space-between;
       gap: 10px;
+      margin-bottom: 0px;
 
       .sizes {
         display: flex;
@@ -167,7 +172,7 @@ export default {
 
 @media (max-width: 600px) {
   .single-product {
-    width: 90%;
+    
   }
 }
 </style>

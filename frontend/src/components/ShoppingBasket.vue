@@ -2,26 +2,20 @@
   <div class="shopping-basket">
     <div class="basket-top">
       <h3>Basket contents</h3>
-      <font-awesome-icon
-        @click="closeShoppingBasket"
-        :icon="['fas', 'x']"
-        id="escapeIcon"
-      />
+      <font-awesome-icon @click="closeShoppingBasket" :icon="['fas', 'x']" id="escapeIcon" />
     </div>
     <div class="product-list">
       <div class="product-column">
         <div class="row">
-          <div class="single-detail"><p>Name</p></div>
+          <div class="single-detail">
+            <p>Name</p>
+          </div>
           <div class="single-detail">Size</div>
           <div class="single-detail">Color</div>
           <div class="single-detail-count">Count</div>
         </div>
       </div>
-      <div
-        class="product-column"
-        v-for="(basketItem, index) in sortedBasket"
-        :key="index"
-      >
+      <div class="product-column" v-for="(basketItem, index) in sortedBasket" :key="index">
         <div class="row">
           <div class="single-detail">
             <b>{{ basketItem.product.name }}</b>
@@ -33,29 +27,17 @@
             <b>{{ basketItem.variant.color }}</b>
           </div>
           <div class="single-detail-count">
-            <font-awesome-icon
-              :icon="['fas', 'angle-left']"
-              class="fa-lg"
-              @click="counter(basketItem, 'decrease')"
-            />
+            <font-awesome-icon :icon="['fas', 'angle-left']" class="fa-lg" @click="counter(basketItem, 'decrease')" />
             <b>{{ basketItem.quantity }}</b>
-            <font-awesome-icon
-              :icon="['fas', 'angle-right']"
-              class="fa-lg"
-              @click="counter(basketItem, 'increase')"
-            />
+            <font-awesome-icon :icon="['fas', 'angle-right']" class="fa-lg" @click="counter(basketItem, 'increase')" />
           </div>
         </div>
         <div class="row-bottom">
           <div class="single-detail">
-            <font-awesome-icon
-              :icon="['far', 'trash-can']"
-              class="fa-lg"
-              @click="
-                updateBasketProduct(basketItem, 'delete');
-                counter(basketItem, 'delete');
-              "
-            />
+            <font-awesome-icon :icon="['far', 'trash-can']" class="fa-lg" @click="
+              updateBasketProduct(basketItem, 'delete');
+            counter(basketItem, 'delete');
+            " />
           </div>
           <div class="single-detail">
             <b>{{ formatTotalPrice(basketItem) }} </b>
@@ -66,14 +48,11 @@
         <b>Total price: {{ this.totalPrice }} $</b>
       </div>
     </div>
-    <button
-      class="primary-button"
-      @click="
-        redirectToOrder();
-        closeShoppingBasket();
-        $emit('total-price-emitted', totalPrice);
-      "
-    >
+    <button class="primary-button" @click="
+      redirectToOrder();
+    closeShoppingBasket();
+    $emit('total-price-emitted', totalPrice);
+    ">
       Order
     </button>
   </div>
@@ -228,10 +207,11 @@ export default {
 
 <style lang=scss>
 @import "../assets/styles/main.scss";
+
 .shopping-basket {
   display: grid;
-  grid-template-rows: 10vh 30vh 10vh;
-
+  grid-template-rows: min-content min-content min-content;
+  gap: 20px;
   position: fixed;
   height: 100vh;
   z-index: 9999;
@@ -240,8 +220,8 @@ export default {
   background-color: var(--background-color);
   text-align: left;
   animation: slideIn 0.3s ease-in forwards;
-  box-shadow: -5px 3px 17px 1px
-    rgba(var(--shadow-color-rgb), var(--shadow-opacity));
+  box-shadow: -5px 3px 17px 1px rgba(var(--shadow-color-rgb), var(--shadow-opacity));
+
   .basket-top {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -249,22 +229,28 @@ export default {
 
     #escapeIcon:hover {
       cursor: pointer;
+      color: red;
     }
   }
+
   .product-list {
     display: grid;
-
-    overflow-y: auto; // Enables scrolling for overflow content
+    overflow-y: auto;
+    gap: 5px;
   }
 
   .product-column {
     display: grid;
-    grid-template-rows: 1fr 1fr; // Adjust based on your design preference
+    grid-template-rows: 1fr 1fr;
+    gap: 5px;
     align-items: center;
     border-bottom: 1px solid var(--border-color);
+
     .row {
       display: grid;
       grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 5px;
+
       .single-detail-count {
         display: grid;
         grid-template-columns: auto auto auto;
@@ -273,13 +259,14 @@ export default {
         gap: 5px;
       }
     }
+
     .row-bottom {
       display: grid;
       grid-template-columns: 1fr auto;
     }
 
-    .fa-lg {
-    }
+    .fa-lg {}
+
     .fa-lg:hover {
       color: var(--secondary-color);
 
@@ -293,11 +280,12 @@ export default {
     max-width: 60vw;
   }
 }
+
 @media (max-width: 600px) {
   .shopping-basket {
     max-width: 70vw;
-    .product-row {
-    }
+
+    .product-row {}
   }
 }
 
