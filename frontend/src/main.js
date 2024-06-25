@@ -27,8 +27,8 @@ const vuetify = createVuetify({
     directives,
   })
 
-const baseMediaUrl = 'http://127.0.0.1:8000';
-const baseUrl = 'http://127.0.0.1:8000/shop';
+const baseMediaUrl = 'http://13.50.242.240:8000';
+const baseUrl = 'http://13.50.242.240:8000/shop';
 
 // Create the Vue app instance
 const app = createApp(App);

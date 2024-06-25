@@ -4,7 +4,7 @@ import os
 import django
 from django.core.files import File
 from django.db.models import Avg
-sys.path.append(r'C:\Users\Light\lkcommerce\backend')
+sys.path.append(r'/home/ubuntu/Lk-commerce/backend')
 from lkcommerce import settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lkcommerce.settings')
 

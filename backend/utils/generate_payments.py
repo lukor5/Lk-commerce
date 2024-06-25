@@ -4,7 +4,7 @@ import django
 import random
 from datetime import datetime, timedelta
 from decimal import Decimal
-sys.path.append(r'C:\Users\Light\lkcommerce\backend')
+sys.path.append(r'/home/ubuntu/Lk-commerce/backend')
 # Set up Django environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lkcommerce.settings')
 django.setup()
